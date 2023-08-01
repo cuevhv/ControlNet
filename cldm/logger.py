@@ -28,7 +28,11 @@ class ImageLogger(Callback):
     def log_local(self, save_dir, split, images, global_step, current_epoch, batch_idx):
         root = os.path.join(save_dir, "image_log", split)
         for k in images:
-            grid = torchvision.utils.make_grid(images[k], nrow=4)
+            image = images[k]
+            if k == "control": #images[k].shape[1] > 3:
+                image = images[k].argmax(1, keepdim=True)
+            
+            grid = torchvision.utils.make_grid(image, nrow=4)
             if self.rescale:
                 grid = (grid + 1.0) / 2.0  # -1,1 -> 0,1; c,h,w
             grid = grid.transpose(0, 1).transpose(1, 2).squeeze(-1)
