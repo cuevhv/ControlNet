@@ -3,9 +3,9 @@ arguments = $(MyArg)
 error = logs/test.$(Process).err
 output = logs/test.$(Process).out
 log = logs/test.$(Process).log
-request_memory = 256000
+request_memory = 128000
 request_cpus = 32
 request_gpus = 8
-requirements = (TARGET.CUDADeviceName=="NVIDIA A100-SXM4-40GB")
+requirements = (TARGET.CUDADeviceName=="NVIDIA A100-SXM4-80GB")
 
 queue MyArg from condor_args.txt
