@@ -1,6 +1,6 @@
 """ python train_apple.py --model_cfg_yaml models/cldm_v21_evermotion_seg.yaml \
     --model_checkpoint models/control_sd21_ini_evermotion_seg.ckpt --dataset_prompts_json dataset/evermotion_dataset/prompt.json \
-    --batch_size 1
+    --batch_size 1 --gpus 1 --workers 0
 """
 from share import *
 import torch
@@ -31,6 +31,7 @@ def parse_args():
     args.add_argument("--model_checkpoint", type=str, help="Path to control model checkpoint or SD(pretrained)+controlnet(new) checkpoint")
     args.add_argument("--dataset_prompts_json", type=str, help="Path to a json file with source, control and prompt file locations")
     args.add_argument("--batch_size", type=int, default=4, help="Batch size")
+    args.add_argument("--gpus", type=int, default=1, help="Number of GPUs to be used")
     args.add_argument("--workers", type=int, default=0, help="Batch size")
     args.add_argument("--half_precision", action="store_true", help="Use half precision")
     
@@ -63,7 +64,7 @@ def main():
     logger = ImageLogger(batch_frequency=logger_freq)
 
     # Train!
-    trainer = pl.Trainer(gpus=1, precision=get_float_precision(args.half_precision), callbacks=[logger])
+    trainer = pl.Trainer(gpus=args.gpus, precision=get_float_precision(args.half_precision), callbacks=[logger])
     trainer.fit(model, dataloader)
 
 
