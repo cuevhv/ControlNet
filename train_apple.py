@@ -1,4 +1,4 @@
-""" python train_apple.py --model_cfg_yaml models/cldm_v21_evermotion_seg.yaml \
+""" TRANSFORMERS_OFFLINE=1 python train_apple.py --model_cfg_yaml models/cldm_v21_evermotion_seg.yaml \
     --model_checkpoint models/control_sd21_ini_evermotion_seg.ckpt --dataset_prompts_json dataset/evermotion_dataset/prompt.json \
     --batch_size 1 --gpus 1 --workers 0
 """
@@ -45,7 +45,7 @@ def main():
     resume_path = args.model_checkpoint 
     batch_size = args.batch_size
     num_workers = args.workers
-    logger_freq = 300
+    logger_freq = 2000
     learning_rate = 1e-5
     sd_locked = True
     only_mid_control = False
