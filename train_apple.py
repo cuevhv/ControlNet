@@ -71,7 +71,8 @@ def main():
                                             filename='evermotion-{step:02d}-{epoch:02d}-{val_loss:.2f}')
 
     # Train!
-    trainer = pl.Trainer(gpus=args.gpus, precision=get_float_precision(args.half_precision), callbacks=[logger, checkpoint_callback])
+    trainer = pl.Trainer(gpus=args.gpus, precision=get_float_precision(args.half_precision), 
+                         callbacks=[logger, checkpoint_callback], accumulate_grad_batches=2)
     trainer.fit(model, dataloader)
 
 
