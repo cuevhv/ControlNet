@@ -9,7 +9,9 @@ from torch.utils.data import DataLoader
 from cldm.logger import ImageLogger
 from cldm.model import create_model, load_state_dict
 from dataloaders.dataset_apple import EvermotionDataset
+from pytorch_lightning.callbacks import ModelCheckpoint
 import argparse
+import os
 
 
 def get_float_precision(is_half_precision: bool):
@@ -49,6 +51,7 @@ def main():
     learning_rate = 1e-5
     sd_locked = True
     only_mid_control = False
+    checkpoints_dir = 'checkpoints'
 
     # First use cpu to load models. Pytorch Lightning will automatically move it to GPUs.
     model = create_model(args.model_cfg_yaml).cpu()
@@ -62,9 +65,13 @@ def main():
     dataloader = DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True)
     
     logger = ImageLogger(batch_frequency=logger_freq)
+    os.mkdirs(checkpoints_dir, exist_ok=True)
+    checkpoint_callback = ModelCheckpoint(every_n_train_steps=logger_freq,
+                                          dirpath=checkpoints_dir,
+                                            filename='evermotion-{step:02d}-{epoch:02d}-{val_loss:.2f}')
 
     # Train!
-    trainer = pl.Trainer(gpus=args.gpus, precision=get_float_precision(args.half_precision), callbacks=[logger])
+    trainer = pl.Trainer(gpus=args.gpus, precision=get_float_precision(args.half_precision), callbacks=[logger, checkpoint_callback])
     trainer.fit(model, dataloader)
 
 
