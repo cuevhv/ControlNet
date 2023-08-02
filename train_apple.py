@@ -65,7 +65,7 @@ def main():
     dataloader = DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True)
     
     logger = ImageLogger(batch_frequency=logger_freq)
-    os.mkdirs(checkpoints_dir, exist_ok=True)
+    os.makedirs(checkpoints_dir, exist_ok=True)
     checkpoint_callback = ModelCheckpoint(every_n_train_steps=logger_freq,
                                           dirpath=checkpoints_dir,
                                             filename='evermotion-{step:02d}-{epoch:02d}-{val_loss:.2f}')
