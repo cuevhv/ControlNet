@@ -15,7 +15,7 @@ from torchvision.utils import make_grid
 from ldm.modules.attention import SpatialTransformer
 from ldm.modules.diffusionmodules.openaimodel import UNetModel, TimestepEmbedSequential, ResBlock, Downsample, AttentionBlock
 from ldm.models.diffusion.ddpm import LatentDiffusion
-from ldm.util import log_txt_as_img, exists, instantiate_from_config
+from ldm.util import log_txt_as_img, log_txt_in_image, exists, instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
 
 
@@ -357,9 +357,11 @@ class ControlLDM(LatentDiffusion):
         c_cat, c = c["c_concat"][0][:N], c["c_crossattn"][0][:N]
         N = min(z.shape[0], N)
         n_row = min(z.shape[0], n_row)
-        log["reconstruction"] = self.decode_first_stage(z)
+        # log["reconstruction"] = self.decode_first_stage(z)
         log["control"] = c_cat * 2.0 - 1.0
-        log["conditioning"] = log_txt_as_img((512, 512), batch[self.cond_stage_key], size=16)
+        log["reconstruction_conditioning"] = log_txt_in_image((512, 512), 
+                                                              batch[self.cond_stage_key], 
+                                                              self.decode_first_stage(z), size=16)
 
         if plot_diffusion_rows:
             # get diffusion row
