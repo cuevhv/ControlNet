@@ -2,6 +2,7 @@ import importlib
 
 import torch
 from torch import optim
+from torchvision import transforms
 import numpy as np
 
 from inspect import isfunction
@@ -25,6 +26,32 @@ def log_txt_as_img(wh, xc, size=10):
         except UnicodeEncodeError:
             print("Cant encode string for logging. Skipping.")
 
+        txt = np.array(txt).transpose(2, 0, 1) / 127.5 - 1.0
+        txts.append(txt)
+    txts = np.stack(txts)
+    txts = torch.tensor(txts)
+    return txts
+
+
+def log_txt_in_image(wh, xc, image, size=10):
+    # wh a tuple of (width, height)
+    # xc a list of captions to plot
+    to_pil = transforms.ToPILImage()
+    
+    b = len(xc)
+    txts = list()
+    for bi in range(b):
+        txt = to_pil(torch.clip((image[bi]+1.0)/2.0, min=0, max=1)) #Image.new("RGB", wh, color="white")
+        draw = ImageDraw.Draw(txt)
+        font = ImageFont.truetype('font/DejaVuSans.ttf', size=size)
+        nc = int(40 * (wh[0] / 256))
+        lines = "\n".join(xc[bi][start:start + nc] for start in range(0, len(xc[bi]), nc))
+
+        try:
+            draw.text((0, 0), lines, fill="red", font=font)
+        except UnicodeEncodeError:
+            print("Cant encode string for logging. Skipping.")
+        # breakpoint()
         txt = np.array(txt).transpose(2, 0, 1) / 127.5 - 1.0
         txts.append(txt)
     txts = np.stack(txts)
