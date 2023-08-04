@@ -63,6 +63,7 @@ def main():
     # dataset
     dataset = EvermotionDataset(args.dataset_prompts_json)
     dataloader = DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True)
+    print("Training images: ", len(dataset))
     
     logger = ImageLogger(batch_frequency=logger_freq)
     os.makedirs(checkpoints_dir, exist_ok=True)
