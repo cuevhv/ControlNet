@@ -15,10 +15,11 @@ if __name__ == "__main__":
     print("batch size: ", dataloader.batch_size)
     print("dataloader length*batch_size: ", dataloader.batch_size*len(dataloader))
     for data in dataloader:
-        print(data.keys(), data["jpg"].shape, data["hint"].shape)
-        rgb_img = (data["jpg"][0].numpy() + 1) / 2 
-        print(np.max(rgb_img), np.min(rgb_img))
-        plt.subplot(1,2,1), plt.imshow(rgb_img)
-        plt.subplot(1,2,2), plt.imshow(data["hint"][0].numpy().argmax(-1))
-        plt.title(data["txt"])
-        plt.show()
+        for i in range(len(data["txt"])):
+            print(data.keys(), data["jpg"].shape, data["hint"].shape)
+            rgb_img = (data["jpg"][i].numpy() + 1) / 2 
+            print(np.max(rgb_img), np.min(rgb_img))
+            plt.subplot(1,2,1), plt.imshow(rgb_img)
+            plt.subplot(1,2,2), plt.imshow(data["hint"][i].numpy().argmax(-1))
+            plt.title(data["txt"][i])
+            plt.show()
