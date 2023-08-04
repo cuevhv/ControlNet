@@ -72,15 +72,3 @@ class EvermotionDataset(Dataset):
         target_rgb, img_conditions = self.transforms(target_rgb, img_conditions)
 
         return dict(jpg=target_rgb, txt=prompt, hint=img_conditions)
-
-
-if __name__ == "__main__":
-    dataset = EvermotionDataset("dataset/evermotion_dataset/prompt.json", ["segmentation"])
-    for data in dataset:
-        print(data.keys())
-        rgb_img = (data["jpg"].numpy().transpose(1,2,0) + 1) / 2 
-        print(np.max(rgb_img), np.min(rgb_img))
-        plt.subplot(1,2,1), plt.imshow(rgb_img)
-        plt.subplot(1,2,2), plt.imshow(data["hint"].numpy().transpose(1,2,0).argmax(-1))
-        plt.title(data["txt"])
-        plt.show()
