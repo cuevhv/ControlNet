@@ -60,7 +60,8 @@ class EvermotionDataset(Dataset):
     def __getitem__(self, idx: int):
         item = self.data[idx]
 
-        prompt = item['prompt']
+        " prompt will be only scene 20% of the time"
+        prompt = item['prompt'] if np.random.random() < 0.8 else "scene"
 
         target_filename = item['target']
         target_rgb = cv2.imread(target_filename)
