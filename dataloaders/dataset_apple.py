@@ -34,7 +34,7 @@ class EvermotionDataset(Dataset):
 
     def get_seg_color(self, target_filename: str):
         condition_filename = target_filename.replace("final_preview", "geometry_hdf5")
-        condition_filename = condition_filename.replace("color.jpg", "semantic.hdf5")
+        condition_filename = condition_filename.replace("tonemap.jpg", "semantic.hdf5")
 
         with h5py.File(condition_filename, "r") as hdf5_file:
             condition_seg = np.asarray(hdf5_file["dataset"], dtype=np.float32)
