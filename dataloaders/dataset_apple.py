@@ -14,7 +14,7 @@ class EvermotionDataset(Dataset):
     def __init__(self, imgs_prompts_fn: str, condition_type = ["segmentation"]):
         self.data = []
 
-        self.n_labels = 40  
+        self.n_labels = 40
         self.condition_type = condition_type
         with open(imgs_prompts_fn, 'rt') as f:
             for line in f:
@@ -30,17 +30,17 @@ class EvermotionDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-    
+
     def get_seg_color(self, target_filename: str):
         condition_filename = target_filename.replace("final_preview", "geometry_hdf5")
         condition_filename = condition_filename.replace("color.jpg", "semantic.hdf5")
 
         with h5py.File(condition_filename, "r") as hdf5_file:
             condition_seg = np.asarray(hdf5_file["dataset"], dtype=np.float32)
-        
+
         condition_seg_labels = np.zeros((condition_seg.shape[0], condition_seg.shape[1], self.n_labels))
         unique_labels = np.unique(condition_seg).astype(np.int32)
-        
+
         for label in unique_labels:
             if label == -1:
                 continue
@@ -49,7 +49,7 @@ class EvermotionDataset(Dataset):
 
 
     def get_condition(self, target_filename: str):
-        if "segmentation" in self.condition_type: 
+        if "segmentation" in self.condition_type:
             condition_seg = self.get_seg_color(target_filename)
         else:
             raise NotImplementedError
@@ -60,11 +60,11 @@ class EvermotionDataset(Dataset):
         item = self.data[idx]
 
         prompt = item['prompt']
-        
+
         target_filename = item['target']
         target_rgb = cv2.imread(target_filename)
         target_rgb = cv2.cvtColor(target_rgb, cv2.COLOR_BGR2RGB)
-        
+
         img_conditions = self.get_condition(target_filename).astype(np.float32)
 
         # Normalize target_rgb images to [-1, 1].

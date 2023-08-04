@@ -1,7 +1,7 @@
 # Code adapted from https://github.com/sail-sg/EditAnything/blob/main/utils/transforms.py
 import torch
 import cv2
-import numpy as np 
+import numpy as np
 from typing import List, Tuple
 
 class RandomHorizontalFlip:
@@ -12,7 +12,7 @@ class RandomHorizontalFlip:
         if np.random.random() < self.prob:
             return np.fliplr(img_rgb), np.fliplr(img_conditions)
         return img_rgb, img_conditions
-    
+
 
 class RandomResizeCrop:
     def __init__(self, size, scale=(0.08, 1.0), fit_to_new_size=False):
@@ -51,12 +51,12 @@ class RandomResizeCrop:
         height, width = img_rgb.shape[:2]
         x = np.random.randint(0, width - self.size + 1)
         y = np.random.randint(0, height - self.size + 1)
-        
+
         img_rgb = img_rgb[y:y + self.size, x:x + self.size]
         img_conditions = img_conditions[y:y + self.size, x:x + self.size]
 
         return img_rgb, img_conditions
-    
+
 
 class ToTensor:
     def __call__(self, img_rgb: np.ndarray, img_conditions: np.ndarray):

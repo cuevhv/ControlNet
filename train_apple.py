@@ -36,7 +36,7 @@ def parse_args():
     args.add_argument("--gpus", type=int, default=1, help="Number of GPUs to be used")
     args.add_argument("--workers", type=int, default=0, help="Batch size")
     args.add_argument("--half_precision", action="store_true", help="Use half precision")
-    
+
     return args.parse_args()
 
 
@@ -44,7 +44,7 @@ def main():
     args = parse_args()
 
     # Configs
-    resume_path = args.model_checkpoint 
+    resume_path = args.model_checkpoint
     batch_size = args.batch_size
     num_workers = args.workers
     logger_freq = 2000
@@ -64,7 +64,7 @@ def main():
     dataset = EvermotionDataset(args.dataset_prompts_json)
     dataloader = DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True)
     print("Training images: ", len(dataset))
-    
+
     logger = ImageLogger(batch_frequency=logger_freq)
     os.makedirs(checkpoints_dir, exist_ok=True)
     checkpoint_callback = ModelCheckpoint(every_n_train_steps=logger_freq,
@@ -72,7 +72,7 @@ def main():
                                             filename='evermotion-{step:02d}-{epoch:02d}-{val_loss:.2f}')
 
     # Train!
-    trainer = pl.Trainer(gpus=args.gpus, precision=get_float_precision(args.half_precision), 
+    trainer = pl.Trainer(gpus=args.gpus, precision=get_float_precision(args.half_precision),
                          callbacks=[logger, checkpoint_callback], accumulate_grad_batches=2)
     trainer.fit(model, dataloader)
 
