@@ -21,7 +21,8 @@ class EvermotionDataset(Dataset):
                 self.data.append(json.loads(line))
 
         self.transforms = custom_transforms.Compose([
-            custom_transforms.RandomResizeCrop(512, scale=(0.9, 1)),
+            # TODO: remove fit_to_new_size
+            custom_transforms.RandomResizeCrop(512, scale=(0.9, 1), fit_to_new_size=True),
             custom_transforms.RandomHorizontalFlip(prob=0.5),
             custom_transforms.ToTensor(),
         ])
