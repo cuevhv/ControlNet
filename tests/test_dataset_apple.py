@@ -8,7 +8,8 @@ sys.path.append(".")
 from dataloaders.dataset_apple import EvermotionDataset
 
 if __name__ == "__main__":
-    dataset = EvermotionDataset("dataset/evermotion_dataset/prompt.json", ["segmentation"])
+    condition_type = "canny"
+    dataset = EvermotionDataset("dataset/evermotion_dataset/prompt.json", ["canny"])
     dataloader = DataLoader(dataset, num_workers=2, batch_size=4, shuffle=True)
     print("dataset images: ", len(dataset))
     print("dataloader length: ", len(dataloader))
@@ -20,6 +21,9 @@ if __name__ == "__main__":
             rgb_img = (data["jpg"][i].numpy() + 1) / 2 
             print(np.max(rgb_img), np.min(rgb_img))
             plt.subplot(1,2,1), plt.imshow(rgb_img)
-            plt.subplot(1,2,2), plt.imshow(data["hint"][i].numpy().argmax(-1))
+            condition = data["hint"][i].numpy()
+            if condition_type == "segmentation":
+                condition = condition.argmax(-1)
+            plt.subplot(1,2,2), plt.imshow(condition)
             plt.title(data["txt"][i])
             plt.show()

@@ -51,10 +51,17 @@ class EvermotionDataset(Dataset):
 
     def get_condition(self, target_filename: str):
         if "segmentation" in self.condition_type:
-            condition_seg = self.get_seg_color(target_filename)
+            condition = self.get_seg_color(target_filename)
+        elif "canny" in self.condition_type:
+            condition = cv2.imread(target_filename)
+            condition = cv2.cvtColor(condition, cv2.COLOR_BGR2GRAY)
+            condition = cv2.Canny(condition, threshold1=100, threshold2=200)
+            condition = condition/255.0
+            condition = np.repeat(condition[:,:,None], 3, axis=-1)
         else:
+            print(self.condition_type)
             raise NotImplementedError
-        return condition_seg
+        return condition
 
 
     def __getitem__(self, idx: int):

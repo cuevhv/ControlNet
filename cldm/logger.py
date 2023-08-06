@@ -11,7 +11,7 @@ from pytorch_lightning.utilities.distributed import rank_zero_only
 class ImageLogger(Callback):
     def __init__(self, batch_frequency=2000, max_images=4, clamp=True, increase_log_steps=True,
                  rescale=True, disabled=False, log_on_batch_idx=False, log_first_step=False,
-                 log_images_kwargs=None):
+                 log_images_kwargs=None, control_type="segmentation"):
         super().__init__()
         self.rescale = rescale
         self.batch_freq = batch_frequency
@@ -23,6 +23,8 @@ class ImageLogger(Callback):
         self.log_on_batch_idx = log_on_batch_idx
         self.log_images_kwargs = log_images_kwargs if log_images_kwargs else {}
         self.log_first_step = log_first_step
+        self.control_type = control_type
+
 
     @rank_zero_only
     def log_local(self, save_dir, split, images, global_step, current_epoch, batch_idx):
@@ -30,7 +32,9 @@ class ImageLogger(Callback):
         for k in images:
             image = images[k]
             if k == "control": #images[k].shape[1] > 3:
-                image = images[k].argmax(1, keepdim=True)
+                image = images[k]
+                if self.control_type == "segmentation":
+                    image = image.argmax(1, keepdim=True)
             
             grid = torchvision.utils.make_grid(image, nrow=4)
             if self.rescale:

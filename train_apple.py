@@ -1,6 +1,6 @@
 """ TRANSFORMERS_OFFLINE=1 python train_apple.py --model_cfg_yaml models/cldm_v21_evermotion_seg.yaml \
     --model_checkpoint models/control_sd21_ini_evermotion_seg.ckpt --dataset_prompts_json dataset/evermotion_dataset/prompt.json \
-    --batch_size 1 --gpus 1 --workers 0
+    --batch_size 1 --gpus 1 --workers 0 --control_type segmentation
 """
 from share import *
 import torch
@@ -11,6 +11,8 @@ from cldm.model import create_model, load_state_dict
 from dataloaders.dataset_apple import EvermotionDataset
 from pytorch_lightning.callbacks import ModelCheckpoint
 import argparse
+import yaml
+from cfgnode import CfgNode
 import os
 
 
@@ -36,12 +38,20 @@ def parse_args():
     args.add_argument("--gpus", type=int, default=1, help="Number of GPUs to be used")
     args.add_argument("--workers", type=int, default=0, help="Batch size")
     args.add_argument("--half_precision", action="store_true", help="Use half precision")
+    args.add_argument("--control_type", type=str, default="segmentation")
+    # args.add_argument("--script_config_yaml", type=str, help="Path to yaml file with the configuration for the script")
 
     return args.parse_args()
 
 
 def main():
     args = parse_args()
+
+    # TODO: add in the future when we wrap up Read config file.
+    # cfg = None
+    # with open(args.script_config_yaml, "r") as f:
+    #     cfg_dict = yaml.load(f, Loader=yaml.FullLoader)
+    #     cfg = CfgNode(cfg_dict)
 
     # Configs
     resume_path = args.model_checkpoint
@@ -61,11 +71,11 @@ def main():
     model.only_mid_control = only_mid_control
 
     # dataset
-    dataset = EvermotionDataset(args.dataset_prompts_json)
+    dataset = EvermotionDataset(args.dataset_prompts_json, condition_type=[args.control_type])
     dataloader = DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True)
     print("Training images: ", len(dataset))
 
-    logger = ImageLogger(batch_frequency=logger_freq)
+    logger = ImageLogger(batch_frequency=logger_freq, control_type=args.control_type)
     os.makedirs(checkpoints_dir, exist_ok=True)
     checkpoint_callback = ModelCheckpoint(every_n_train_steps=logger_freq,
                                           dirpath=checkpoints_dir,
