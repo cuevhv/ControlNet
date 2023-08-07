@@ -1,0 +1,13 @@
+executable = condor_run.sh
+arguments = $(MyArg)
+experiment = canny
+error = logs/test_$(experiment).$(Process).err
+output = logs/test_$(experiment).$(Process).out
+log = logs/test_$(experiment).$(Process).log
+request_memory = 256000
+request_cpus = 32
+request_gpus = 4
+requirements = (TARGET.CUDADeviceName=="NVIDIA A100-SXM4-80GB")
+#use template : FullNode
+
+queue MyArg from condor_args.txt
