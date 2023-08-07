@@ -403,11 +403,13 @@ class ControlLDM(LatentDiffusion):
                                              unconditional_conditioning=uc_full,
                                              )
             x_samples_cfg = self.decode_first_stage(samples_cfg)
-            #log[f"samples_cfg_scale_{unconditional_guidance_scale:.2f}"] = x_samples_cfg
 
-            log[f"samples_cfg_scale_{unconditional_guidance_scale:.2f}"] = log_txt_in_image((512, 512), 
-                                                     batch[self.cond_stage_key], 
-                                                     x_samples_cfg, size=16)
+            # TODO: change this to write text to samples_cfg_scale
+            log[f"samples_cfg_scale_{unconditional_guidance_scale:.2f}"] = x_samples_cfg
+
+            # log[f"samples_cfg_scale_{unconditional_guidance_scale:.2f}"] = log_txt_in_image((512, 512),
+            #                                          batch[self.cond_stage_key],
+            #                                          x_samples_cfg, size=16)
 
         return log
 
