@@ -31,9 +31,10 @@ class RandomResizeCrop:
         with_scale = int(np.ceil(width*scale))
         height_scale = int(np.ceil(height*scale))
         img_rgb = cv2.resize(img_rgb, (with_scale, height_scale))
-        img_conditions = cv2.resize(img_conditions, (with_scale, height_scale))
+        img_conditions = cv2.resize(img_conditions, (with_scale, height_scale), interpolation=cv2.INTER_NEAREST)
 
         return img_rgb, img_conditions
+
 
     def __call__(self, img_rgb, img_conditions):
         if self.fit_to_new_size:
@@ -45,7 +46,7 @@ class RandomResizeCrop:
         with_scale = int(width*scale)
         height_scale = int(height*scale)
         img_rgb = cv2.resize(img_rgb, (with_scale, height_scale))
-        img_conditions = cv2.resize(img_conditions, (with_scale, height_scale))
+        img_conditions = cv2.resize(img_conditions, (with_scale, height_scale), interpolation=cv2.INTER_NEAREST)
 
         # Crop
         height, width = img_rgb.shape[:2]
