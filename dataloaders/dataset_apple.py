@@ -49,6 +49,24 @@ class EvermotionDataset(Dataset):
         return condition_seg_labels
 
 
+    def get_depth(self, target_filename: str, inverse_depth: bool = True, to_cm: bool = True):
+        condition_filename = target_filename.replace("final_preview", "geometry_hdf5")
+        condition_filename = condition_filename.replace("tonemap.jpg", "depth_meters.hdf5")
+
+        with h5py.File(condition_filename, "r") as hdf5_file:
+            condition_depth = np.asarray(hdf5_file["dataset"], dtype=np.float32)
+
+        if to_cm:
+           condition_depth = condition_depth*100
+
+        condition_depth = 1./condition_depth
+        condition_depth -= np.nanmin(condition_depth)
+        condition_depth /= np.nanmax(condition_depth)
+        condition_depth = np.nan_to_num(condition_depth, nan=0)
+
+        return condition_depth
+
+
     def get_condition(self, target_filename: str):
         if "segmentation" in self.condition_type:
             condition = self.get_seg_color(target_filename)
@@ -57,6 +75,9 @@ class EvermotionDataset(Dataset):
             condition = cv2.cvtColor(condition, cv2.COLOR_BGR2GRAY)
             condition = cv2.Canny(condition, threshold1=100, threshold2=200)
             condition = condition/255.0
+            condition = np.repeat(condition[:,:,None], 3, axis=-1)
+        elif "depth" in self.condition_type:
+            condition = self.get_depth(target_filename, inverse_depth=True, to_cm=True)
             condition = np.repeat(condition[:,:,None], 3, axis=-1)
         else:
             print(self.condition_type)
