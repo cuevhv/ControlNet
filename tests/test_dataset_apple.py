@@ -8,22 +8,24 @@ sys.path.append(".")
 from dataloaders.dataset_apple import EvermotionDataset
 
 if __name__ == "__main__":
-    condition_type = "canny"
-    dataset = EvermotionDataset("dataset/evermotion_dataset/prompt.json", ["canny"])
-    dataloader = DataLoader(dataset, num_workers=2, batch_size=4, shuffle=True)
+    condition_type = "depth"
+    dataset = EvermotionDataset("dataset/evermotion_dataset/prompt.json", [condition_type])
+    dataloader = DataLoader(dataset, num_workers=0, batch_size=1, shuffle=True)
     print("dataset images: ", len(dataset))
     print("dataloader length: ", len(dataloader))
     print("batch size: ", dataloader.batch_size)
     print("dataloader length*batch_size: ", dataloader.batch_size*len(dataloader))
-    for data in dataloader:
+    for j, data in enumerate(dataloader):
         for i in range(len(data["txt"])):
             print(data.keys(), data["jpg"].shape, data["hint"].shape)
-            rgb_img = (data["jpg"][i].numpy() + 1) / 2 
+            rgb_img = (data["jpg"][i].numpy() + 1) / 2
             print(np.max(rgb_img), np.min(rgb_img))
             plt.subplot(1,2,1), plt.imshow(rgb_img)
             condition = data["hint"][i].numpy()
             if condition_type == "segmentation":
                 condition = condition.argmax(-1)
+            print("condition max min vals: ", np.max(condition), np.min(condition))
             plt.subplot(1,2,2), plt.imshow(condition)
             plt.title(data["txt"][i])
+            # plt.savefig(f"out_{j}_{i}.png")
             plt.show()
