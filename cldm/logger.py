@@ -34,8 +34,11 @@ class ImageLogger(Callback):
             if k == "control": #images[k].shape[1] > 3:
                 image = images[k]
                 if self.control_type == "segmentation":
+                    n_clases = image.shape[1]
+                    color_multiplier = 1. / (n_clases - 1)
                     image = image.argmax(1, keepdim=True)
-            
+                    image = image.float() * color_multiplier
+
             grid = torchvision.utils.make_grid(image, nrow=4)
             if self.rescale:
                 grid = (grid + 1.0) / 2.0  # -1,1 -> 0,1; c,h,w
