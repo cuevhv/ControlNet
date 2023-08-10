@@ -11,7 +11,6 @@ class BedlamSimpleDataset(Dataset):
     def __init__(self, imgs_prompts_fn: str, condition_type = ["segment_human_and_clothes"]):
         self.data = []
 
-        self.n_labels = 40
         self.condition_type = condition_type
         with open(imgs_prompts_fn, 'rt') as f:
             for line in f:
@@ -38,17 +37,17 @@ class BedlamSimpleDataset(Dataset):
         condition_body_filename = condition_fn[0]+"_00_body.png"
         condition_clothe_filename = condition_fn[0]+"_00_clothing.png"
 
-        print(condition_body_filename)
         condition_masks_body = cv2.imread(condition_body_filename, cv2.IMREAD_GRAYSCALE)
         condition_masks_clothe = cv2.imread(condition_clothe_filename, cv2.IMREAD_GRAYSCALE)
         condition_masks_body = condition_masks_body/255.
         condition_masks_clothe = condition_masks_clothe/255.
 
         condition_masks = condition_masks_body + condition_masks_clothe
+
         if single_channel is False:
             condition_env = 1 - condition_masks
             condition_masks = np.stack([condition_env, condition_masks_body, condition_masks_clothe], axis=-1)
-            print(condition_masks.shape)
+
         return condition_masks, condition_fn
 
 
@@ -71,7 +70,6 @@ class BedlamSimpleDataset(Dataset):
 
 
     def get_condition(self, target_filename: str):
-        print("Using condition: ", self.condition_type)
         if "segment_human_env" in self.condition_type:
             # Returns single mask with human vs envirnoment
             condition, condition_fn = self.get_segment_human_masks(target_filename, single_channel=True)
