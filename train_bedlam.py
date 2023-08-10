@@ -1,5 +1,5 @@
-""" TRANSFORMERS_OFFLINE=1 python train_apple.py --model_cfg_yaml models/cldm_v21_bedlam50_seg_body_clothes.yaml \
-    --model_checkpoint models/control_sd21_ini_bedlam50_seg_body_clothes.ckpt --dataset_prompts_json dataset/evermotion_dataset/prompt.json \
+""" TRANSFORMERS_OFFLINE=1 python train_bedlam.py --model_cfg_yaml models/cldm_v15_bedlam50_seg_body_clothes.yaml \
+    --model_checkpoint models/control_sd15_ini_bedlam50_seg_body_clothes.ckpt --dataset_prompts_json dataset/20230804_1_3000_hdri/prompt.json \
     --batch_size 1 --gpus 1 --workers 0 --control_type segment_human_and_clothes
 """
 from share import *
@@ -85,7 +85,6 @@ def main():
     trainer = pl.Trainer(gpus=args.gpus, precision=get_float_precision(args.half_precision),
                          callbacks=[logger, checkpoint_callback], accumulate_grad_batches=2)
     trainer.fit(model, dataloader)
-
 
 if __name__ == '__main__':
     main()
