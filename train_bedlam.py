@@ -33,7 +33,8 @@ def parse_args():
     args = argparse.ArgumentParser()
     args.add_argument("--model_cfg_yaml", type=str, help="Path to control model configuration yaml file")
     args.add_argument("--model_checkpoint", type=str, help="Path to control model checkpoint or SD(pretrained)+controlnet(new) checkpoint")
-    args.add_argument("--dataset_prompts_json", type=str, help="Path to a json file with source, control and prompt file locations")
+    args.add_argument("--train_dataset_prompts_json", type=str, help="Path to a json file with source, control and prompt file locations")
+    args.add_argument("--val_dataset_prompts_json", type=str, help="Path to a json file with source, control and prompt file locations")
     args.add_argument("--batch_size", type=int, default=4, help="Batch size")
     args.add_argument("--gpus", type=int, default=1, help="Number of GPUs to be used")
     args.add_argument("--workers", type=int, default=0, help="Batch size")
@@ -71,9 +72,13 @@ def main():
     model.only_mid_control = only_mid_control
 
     # dataset
-    dataset = BedlamSimpleDataset(args.dataset_prompts_json, condition_type=[args.control_type])
-    dataloader = DataLoader(dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True)
-    print("Training images: ", len(dataset))
+    train_dataset = BedlamSimpleDataset(args.dataset_prompts_json, condition_type=[args.control_type])
+    train_dataloader = DataLoader(train_dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True)
+
+    val_dataset = BedlamSimpleDataset(args.dataset_prompts_json, condition_type=[args.control_type])
+    val_dataloader = DataLoader(val_dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True)
+
+    print("Training images: ", len(train_dataset))
 
     logger = ImageLogger(batch_frequency=logger_freq, control_type=args.control_type)
     os.makedirs(checkpoints_dir, exist_ok=True)
@@ -84,7 +89,7 @@ def main():
     # Train!
     trainer = pl.Trainer(gpus=args.gpus, precision=get_float_precision(args.half_precision),
                          callbacks=[logger, checkpoint_callback], accumulate_grad_batches=2)
-    trainer.fit(model, dataloader)
+    trainer.fit(model, train_dataloader, val_dataloaders=val_dataloader)
 
 if __name__ == '__main__':
     main()
