@@ -1,0 +1,1 @@
+models/cldm_v15_bedlam50_seg_body_clothes.yaml models/control_sd15_ini_bedlam50_seg_body_clothes.ckpt dataset/20230804_1_3000_hdri/prompt.json
