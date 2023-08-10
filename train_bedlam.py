@@ -72,10 +72,10 @@ def main():
     model.only_mid_control = only_mid_control
 
     # dataset
-    train_dataset = BedlamSimpleDataset(args.dataset_prompts_json, condition_type=[args.control_type])
+    train_dataset = BedlamSimpleDataset(args.train_dataset_prompts_json, condition_type=[args.control_type])
     train_dataloader = DataLoader(train_dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True)
 
-    val_dataset = BedlamSimpleDataset(args.dataset_prompts_json, condition_type=[args.control_type])
+    val_dataset = BedlamSimpleDataset(args.val_dataset_prompts_json, condition_type=[args.control_type])
     val_dataloader = DataLoader(val_dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True)
 
     print("Training images: ", len(train_dataset))
