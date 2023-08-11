@@ -91,7 +91,7 @@ def main():
         print("Training images: ", len(train_dataset))
 
 
-    logger = ImageLogger(batch_frequency=logger_freq, control_type=args.control_type)
+    logger = ImageLogger(batch_frequency=logger_freq, control_type=args.control_type, max_images=8)
     os.makedirs(checkpoints_dir, exist_ok=True)
     checkpoint_callback = ModelCheckpoint(every_n_train_steps=logger_freq,
                                           dirpath=checkpoints_dir,
