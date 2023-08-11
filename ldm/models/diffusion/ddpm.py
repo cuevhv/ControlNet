@@ -433,6 +433,11 @@ class DDPM(pl.LightningModule):
         return loss, loss_dict
 
     def training_step(self, batch, batch_idx):
+
+        print("#"*80)
+        print(f"DDPM batch size: {batch['jpg'].shape}")
+        print("#"*80)
+
         for k in self.ucg_training:
             p = self.ucg_training[k]["p"]
             val = self.ucg_training[k]["val"]

@@ -1,0 +1,12 @@
+model:
+  # Path to control model configuration yaml file
+  model_cfg_yaml: models/cldm_v21_evermotion_seg.yaml
+  # Path to control model checkpoint or SD(pretrained)+controlnet(new) checkpoint
+  model_checkpoint: models/control_sd21_ini_evermotion_seg.ckpt
+  # Path to a json file with source, control and prompt file locations
+  dataset_prompts_json: dataset/evermotion_dataset/prompt.json
+model_params:
+  batch_size: 32
+  gpus: 8
+  workers: 16
+  half_precision: False
