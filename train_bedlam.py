@@ -1,5 +1,7 @@
 """ TRANSFORMERS_OFFLINE=1 python train_bedlam.py --model_cfg_yaml models/cldm_v15_bedlam50_seg_body_clothes.yaml \
-    --model_checkpoint models/control_sd15_ini_bedlam50_seg_body_clothes.ckpt --dataset_prompts_json dataset/20230804_1_3000_hdri/prompt.json \
+    --model_checkpoint models/control_sd15_ini_bedlam50_seg_body_clothes.ckpt \
+    --train_dataset_prompts_json dataset/20230804_1_3000_hdri/prompt_train.json \
+    --val_dataset_prompts_json dataset/20230804_1_3000_hdri/prompt_val.json \
     --batch_size 1 --gpus 1 --workers 0 --control_type segment_human_and_clothes
 """
 from share import *
@@ -11,6 +13,7 @@ from cldm.model import create_model, load_state_dict
 from dataloaders.dataset_bedlam import BedlamSimpleDataset
 from pytorch_lightning.callbacks import ModelCheckpoint
 import argparse
+from dataloaders.pl_dataloader_bedlam import BedlamDataModule
 import yaml
 #from cfgnode import CfgNode
 import os
@@ -71,14 +74,22 @@ def main():
     model.sd_locked = sd_locked
     model.only_mid_control = only_mid_control
 
+    use_pl_datamoule = True
     # dataset
-    train_dataset = BedlamSimpleDataset(args.train_dataset_prompts_json, condition_type=[args.control_type])
-    train_dataloader = DataLoader(train_dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True)
+    if use_pl_datamoule:
+        data_module = BedlamDataModule(train_data_json=args.train_dataset_prompts_json, val_data_json=args.val_dataset_prompts_json,
+                                    control_type=[args.control_type], train_dataloader_conf={'batch_size': batch_size,
+                                                                                   'num_workers': num_workers,
+                                                                                   'shuffle': True})
+    else:
+        train_dataset = BedlamSimpleDataset(args.train_dataset_prompts_json, condition_type=[args.control_type])
+        train_dataloader = DataLoader(train_dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True)
 
-    val_dataset = BedlamSimpleDataset(args.val_dataset_prompts_json, condition_type=[args.control_type])
-    val_dataloader = DataLoader(val_dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True)
+        val_dataset = BedlamSimpleDataset(args.val_dataset_prompts_json, condition_type=[args.control_type])
+        val_dataloader = DataLoader(val_dataset, num_workers=num_workers, batch_size=batch_size, shuffle=False)
 
-    print("Training images: ", len(train_dataset))
+        print("Training images: ", len(train_dataset))
+
 
     logger = ImageLogger(batch_frequency=logger_freq, control_type=args.control_type)
     os.makedirs(checkpoints_dir, exist_ok=True)
@@ -89,7 +100,11 @@ def main():
     # Train!
     trainer = pl.Trainer(gpus=args.gpus, precision=get_float_precision(args.half_precision),
                          callbacks=[logger, checkpoint_callback], accumulate_grad_batches=2)
-    trainer.fit(model, train_dataloader, val_dataloaders=val_dataloader)
+
+    if use_pl_datamoule:
+        trainer.fit(model, data_module)
+    else:
+        trainer.fit(model, train_dataloader, val_dataloaders=val_dataloader)
 
 if __name__ == '__main__':
     main()
