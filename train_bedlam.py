@@ -98,8 +98,13 @@ def main():
                                             filename='evermotion-{step:02d}-{epoch:02d}-{val_loss:.2f}')
 
     # Train!
-    trainer = pl.Trainer(gpus=args.gpus, precision=get_float_precision(args.half_precision),
-                         callbacks=[logger, checkpoint_callback], accumulate_grad_batches=2)
+    if pl.__version__ == "2.0.6":
+        trainer = pl.Trainer(accelerator="gpu", devices=args.gpus, precision=get_float_precision(args.half_precision),
+                    callbacks=[logger, checkpoint_callback], accumulate_grad_batches=2)
+
+    else:
+        trainer = pl.Trainer(gpus=args.gpus, precision=get_float_precision(args.half_precision),
+                            callbacks=[logger, checkpoint_callback], accumulate_grad_batches=2)
 
     if use_pl_datamoule:
         trainer.fit(model, data_module)
