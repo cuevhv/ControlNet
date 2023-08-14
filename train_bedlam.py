@@ -99,7 +99,7 @@ def main():
 
     # Train!
     if pl.__version__ == "2.0.6":
-        trainer = pl.Trainer(accelerator="gpu", devices=args.gpus, precision=get_float_precision(args.half_precision),
+        trainer = pl.Trainer(accelerator="gpu", devices=args.gpus, strategy="ddp", precision=get_float_precision(args.half_precision),
                     callbacks=[logger, checkpoint_callback], accumulate_grad_batches=2)
 
     else:
