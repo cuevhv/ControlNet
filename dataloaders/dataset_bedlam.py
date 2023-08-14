@@ -39,6 +39,13 @@ class BedlamSimpleDataset(Dataset):
 
         condition_masks_body = cv2.imread(condition_body_filename, cv2.IMREAD_GRAYSCALE)
         condition_masks_clothe = cv2.imread(condition_clothe_filename, cv2.IMREAD_GRAYSCALE)
+
+        # Some images do not have body or clothes masks so we create a black mask for them
+        if condition_masks_body is None:
+            condition_masks_body = np.zeros((512, 512), dtype=np.uint8)
+        if condition_masks_clothe is None:
+            condition_masks_clothe = np.zeros((512, 512), dtype=np.uint8)
+
         condition_masks_body = condition_masks_body/255.
         condition_masks_clothe = condition_masks_clothe/255.
 
