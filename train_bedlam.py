@@ -37,7 +37,7 @@ def parse_args():
     args.add_argument("--model_cfg_yaml", type=str, help="Path to control model configuration yaml file")
     args.add_argument("--model_checkpoint", type=str, help="Path to control model checkpoint or SD(pretrained)+controlnet(new) checkpoint")
     args.add_argument("--train_dataset_prompts_json", type=str, help="Path to a json file with source, control and prompt file locations")
-    args.add_argument("--val_dataset_prompts_json", type=str, help="Path to a json file with source, control and prompt file locations")
+    args.add_argument("--val_dataset_prompts_json", type=str, default=None, help="Path to a json file with source, control and prompt file locations")
     args.add_argument("--batch_size", type=int, default=4, help="Batch size")
     args.add_argument("--gpus", type=int, default=1, help="Number of GPUs to be used")
     args.add_argument("--workers", type=int, default=0, help="Batch size")
