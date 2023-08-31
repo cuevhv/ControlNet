@@ -3,6 +3,13 @@
     --train_dataset_prompts_json dataset/20230804_1_3000_hdri/prompt_train.json \
     --val_dataset_prompts_json dataset/20230804_1_3000_hdri/prompt_val.json \
     --batch_size 1 --gpus 1 --workers 0 --control_type segment_human_and_clothes
+
+    TRANSFORMERS_OFFLINE=1 python train_bedlam.py --model_cfg_yaml models/cldm_v21_bedlam50_SegBodyClothes_HandsLdmks2d_BodyCorresp.yaml \
+    --model_checkpoint models/control_sd21_ini_bedlam50_SegBodyClothes_HandsLdmks2d_BodyCorresp.ckpt \
+    --train_dataset_prompts_json dataset/20230804_1_3000_hdri/prompt_train.json \
+    --val_dataset_prompts_json dataset/20230804_1_3000_hdri/prompt_val.json \
+    --batch_size 4 --gpus 1 --workers 0 --control_type segment_human_and_clothes body_correspondence ldmks2d
+
 """
 from share import *
 import torch
