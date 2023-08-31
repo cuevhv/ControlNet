@@ -42,7 +42,7 @@ def parse_args():
     args.add_argument("--gpus", type=int, default=1, help="Number of GPUs to be used")
     args.add_argument("--workers", type=int, default=0, help="Batch size")
     args.add_argument("--half_precision", action="store_true", help="Use half precision")
-    args.add_argument("--control_type", type=str, default="segmentation")
+    args.add_argument("--control_type", nargs="*", type=str, default=["segmentation"])
     # args.add_argument("--script_config_yaml", type=str, help="Path to yaml file with the configuration for the script")
 
     return args.parse_args()
@@ -78,14 +78,14 @@ def main():
     # dataset
     if use_pl_datamoule:
         data_module = BedlamDataModule(train_data_json=args.train_dataset_prompts_json, val_data_json=args.val_dataset_prompts_json,
-                                    control_type=[args.control_type], train_dataloader_conf={'batch_size': batch_size,
+                                    control_type=args.control_type, train_dataloader_conf={'batch_size': batch_size,
                                                                                    'num_workers': num_workers,
                                                                                    'shuffle': True})
     else:
-        train_dataset = BedlamSimpleDataset(args.train_dataset_prompts_json, condition_type=[args.control_type])
+        train_dataset = BedlamSimpleDataset(args.train_dataset_prompts_json, condition_type=args.control_type)
         train_dataloader = DataLoader(train_dataset, num_workers=num_workers, batch_size=batch_size, shuffle=True)
 
-        val_dataset = BedlamSimpleDataset(args.val_dataset_prompts_json, condition_type=[args.control_type])
+        val_dataset = BedlamSimpleDataset(args.val_dataset_prompts_json, condition_type=args.control_type)
         val_dataloader = DataLoader(val_dataset, num_workers=num_workers, batch_size=batch_size, shuffle=False)
 
         print("Training images: ", len(train_dataset))
