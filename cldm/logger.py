@@ -6,7 +6,10 @@ import torchvision
 from PIL import Image
 from pytorch_lightning.callbacks import Callback
 from pytorch_lightning.utilities.distributed import rank_zero_only
+from distinctipy import distinctipy
 
+COLORS = np.array(distinctipy.get_colors(100))
+COLORS[0] = [0, 0, 0]
 
 class ImageLogger(Callback):
     def __init__(self, batch_frequency=2000, max_images=4, clamp=True, increase_log_steps=True,
@@ -27,28 +30,49 @@ class ImageLogger(Callback):
 
 
     @rank_zero_only
-    def log_local(self, save_dir, split, images, global_step, current_epoch, batch_idx):
+    def log_local(self, save_dir, split, images, global_step, current_epoch, batch_idx, condition_names, condition_sizes):
         root = os.path.join(save_dir, "image_log", split)
         for k in images:
             image = images[k]
             if k == "control": #images[k].shape[1] > 3:
                 image = images[k]
-                if self.control_type == "segmentation":
-                    n_clases = image.shape[1]
-                    color_multiplier = 1. / (n_clases - 1)
-                    image = image.argmax(1, keepdim=True)
-                    image = image.float() * color_multiplier
+                for cond_idx, condition_name in enumerate(condition_names):
+                    condition_size = condition_sizes[cond_idx]
+                    if cond_idx == 0:
+                        start_idx = 0
+                        end_idx = 0
+                    else:
+                        start_idx = end_idx
+                    end_idx = end_idx + condition_size
+                    individual_condition_img = image[:, start_idx:end_idx]
+                    if condition_name in ["segment_human_and_clothes", "ldmks2d"]:
+                        n_clases = individual_condition_img.shape[1]
+                        color_multiplier = 1. / (n_clases - 1)
+                        condition_indices = individual_condition_img.argmax(1, keepdim=False).numpy()
+                        individual_condition_img = torch.from_numpy(COLORS[condition_indices]).type(image.dtype).permute(0, 3, 1, 2)
+                    # breakpoint()
+                    grid = torchvision.utils.make_grid(individual_condition_img, nrow=4)
+                    if self.rescale:
+                        grid = (grid + 1.0) / 2.0  # -1,1 -> 0,1; c,h,w
+                    grid = grid.transpose(0, 1).transpose(1, 2).squeeze(-1)
+                    grid = grid.numpy()
+                    grid = (grid * 255).astype(np.uint8)
+                    filename = "{}_gs-{:06}_e-{:06}_b-{:06}.png".format(k+"_"+condition_name, global_step, current_epoch, batch_idx)
+                    path = os.path.join(root, filename)
+                    os.makedirs(os.path.split(path)[0], exist_ok=True)
+                    Image.fromarray(grid).save(path)
 
-            grid = torchvision.utils.make_grid(image, nrow=4)
-            if self.rescale:
-                grid = (grid + 1.0) / 2.0  # -1,1 -> 0,1; c,h,w
-            grid = grid.transpose(0, 1).transpose(1, 2).squeeze(-1)
-            grid = grid.numpy()
-            grid = (grid * 255).astype(np.uint8)
-            filename = "{}_gs-{:06}_e-{:06}_b-{:06}.png".format(k, global_step, current_epoch, batch_idx)
-            path = os.path.join(root, filename)
-            os.makedirs(os.path.split(path)[0], exist_ok=True)
-            Image.fromarray(grid).save(path)
+            else:
+                grid = torchvision.utils.make_grid(image, nrow=4)
+                if self.rescale:
+                    grid = (grid + 1.0) / 2.0  # -1,1 -> 0,1; c,h,w
+                grid = grid.transpose(0, 1).transpose(1, 2).squeeze(-1)
+                grid = grid.numpy()
+                grid = (grid * 255).astype(np.uint8)
+                filename = "{}_gs-{:06}_e-{:06}_b-{:06}.png".format(k, global_step, current_epoch, batch_idx)
+                path = os.path.join(root, filename)
+                os.makedirs(os.path.split(path)[0], exist_ok=True)
+                Image.fromarray(grid).save(path)
 
     def log_img(self, pl_module, batch, batch_idx, split="train"):
         check_idx = batch_idx  # if self.log_on_batch_idx else pl_module.global_step
@@ -72,9 +96,11 @@ class ImageLogger(Callback):
                     images[k] = images[k].detach().cpu()
                     if self.clamp:
                         images[k] = torch.clamp(images[k], -1., 1.)
+            condition_names = batch['condition_names'][0].split(',')
+            condition_sizes = batch['condition_sizes'][0].detach().cpu().numpy().tolist()
 
             self.log_local(pl_module.logger.save_dir, split, images,
-                           pl_module.global_step, pl_module.current_epoch, batch_idx)
+                           pl_module.global_step, pl_module.current_epoch, batch_idx, condition_names, condition_sizes)
 
             if is_train:
                 pl_module.train()
