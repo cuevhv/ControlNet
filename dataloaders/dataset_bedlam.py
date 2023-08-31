@@ -32,7 +32,8 @@ class BedlamSimpleDataset(Dataset):
         folder_1 = "hdri_masks"
         folder_2 = os.path.join("exr_layers", "masks")
         # /home/hcuevas/Documents/work/gen_bedlam/datasets/20230804_1_3000_hdri/exr_layers/masks_untar/20230804_1_3000_hdri_masks.0/20230804_1_3000_hdri/exr_layers/masks/seq_000000/seq_000000_0000_00_env.png
-        condition_fn = target_fn.replace("hdri_png", folder_1).replace("png", folder_2)
+        condition_fn = target_fn.replace("png_seqs", "masks_seqs")
+        # condition_fn = target_fn.replace("hdri_png", folder_1).replace("png", folder_2)
         condition_fn = condition_fn.rsplit(".", 1)
         condition_body_filename = condition_fn[0]+"_00_body.png"
         condition_clothe_filename = condition_fn[0]+"_00_clothing.png"
