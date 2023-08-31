@@ -394,7 +394,7 @@ class ControlLDM(LatentDiffusion):
                 log["denoise_row"] = denoise_grid
 
         if unconditional_guidance_scale > 1.0:
-            uc_cross = self.get_unconditional_conditioning(N)
+            uc_cross = self.get_unconditional_conditioning(N)  # Gets the conditioning with empty prompt
             uc_cat = c_cat  # torch.zeros_like(c_cat)
             uc_full = {"c_concat": [uc_cat], "c_crossattn": [uc_cross]}
             samples_cfg, _ = self.sample_log(cond={"c_concat": [c_cat], "c_crossattn": [c]},
