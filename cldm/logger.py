@@ -10,7 +10,6 @@ if pl.__version__ == "2.0.6":
     from pytorch_lightning.utilities.rank_zero import rank_zero_only
 else:
     from pytorch_lightning.utilities.distributed import rank_zero_only
-from pytorch_lightning.utilities.distributed import rank_zero_only
 from distinctipy import distinctipy
 
 COLORS = np.array(distinctipy.get_colors(100))
